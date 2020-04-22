@@ -1,9 +1,10 @@
 <template>
   <div class="global-map-container">
+
     <l-map
       ref="dengzhouMap"
       :zoom="zoom"
-      :minZoom="8"
+      :minZoom="10"
       :maxZoom="18"
       :center="center"
       :options="mapOptions"
@@ -23,6 +24,8 @@
         layer-type="base"
       />
     </l-map>
+
+    <!-- <button @click="doTest" style="border:5px solid red;position:absolute;bottom:0;left:0;font-size:40px;z-index:9999999999">测试按钮</button> -->
   </div>
 </template>
 
@@ -73,8 +76,33 @@ export default {
       tileProviders: tileProviders
     }
   },
-  mounted () {},
+  mounted () {
+    this.$nextTick(() => {
+      window.Vue.$on('zoomIn', () => {
+        // alert('zoomIn')
+        this.zoom = this.zoom + 1
+        if (this.zoom > 18) {
+          this.zoom = 18
+        }
+      })
+
+      window.Vue.$on('zoomOut', () => {
+        // alert('zoomIn')
+        this.zoom = this.zoom - 1
+        if (this.zoom < 10) {
+          this.zoom = 10
+        }
+      })
+    })
+  },
   methods: {
+    doTest () {
+      const callback = function (data) {
+        alert(data.name)
+        alert(data.age)
+      }
+      window.APP.invokeClientMethod('getUser', { name: 'lafeillou', age: '12' }, callback)
+    },
     // 地图加载完成
     leafletLoaded () {
       // this.addKmlLayer('/mapdata/邓州市矢量路网/邓州市_矢量路网/邓州市_矢量路网.kml')

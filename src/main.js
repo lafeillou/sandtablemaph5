@@ -6,7 +6,7 @@ import store from './store'
 import 'leaflet/dist/leaflet.css'
 Vue.config.productionTip = false
 
-new Vue({
+window.Vue = new Vue({
   router,
   store,
   render: h => h(App)
