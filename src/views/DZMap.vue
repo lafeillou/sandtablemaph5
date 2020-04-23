@@ -155,7 +155,7 @@ export default {
                 iconUrl,
                 iconSize: [40, 40]
               })
-
+              this.map.panTo(latlng)
               return L.marker(latlng, { icon: myIcon, title: targetData.targetName })
             },
             onEachFeature: (feature, layer) => {
