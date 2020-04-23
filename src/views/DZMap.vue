@@ -23,10 +23,17 @@
         :attribution="tileProvider.attribution"
         layer-type="base"
       />
+
+      <!--自定义图层-->
+      <!-- <l-geo-json :geojson="JSON.parse(item.targetLocationArea)" v-for="item in customLayers" :key="item.id" :visible="item.isOn"></l-geo-json> -->
     </l-map>
 
     <!-- <button @click="doTest" style="border:5px solid red;position:absolute;bottom:0;left:0;font-size:40px;z-index:9999999999">测试按钮</button> -->
+    <!-- <div style="position:absolute;background-color:#000;top:0;left:0;bottom:0;right:0;z-index:9999999;color:#fff;font-size:14px;padding:50px;">
+      <p v-for="item in customLayers" :key="item.id" style="color:#fff;">{{item.isOn ? 'true': 'false'}}</p>
+    </div> -->
   </div>
+
 </template>
 
 <script>
@@ -46,6 +53,9 @@ import L from 'leaflet'
 
 import { tileProviders } from '@/setting.js'
 
+// icon映射
+import classifyIconMap from './classify-icon-map.js'
+
 export default {
   name: 'DZMap',
   components: {
@@ -58,6 +68,16 @@ export default {
     // LControlAttribution,
     // LControlScale,
     // LControlLayers
+  },
+
+  computed: {
+    // customLayersArr: function () {
+    //   const result = []
+    //   Object.keys(this.customLayers).forEach(key => {
+    //     result.push(this.customLayers[key])
+    //   })
+    //   return result
+    // }
   },
   data () {
     return {
@@ -75,8 +95,16 @@ export default {
       // 图层控制器
       layersPosition: 'topleft',
       // 图层集合
-      tileProviders: tileProviders
+      tileProviders: tileProviders,
+      // 自定义图层集合(GeoJson格式)，点击某个目标，发送一个GeoJson,就会对应到这个map里面
+      customLayers: {},
+      // leaflet地图实例引用
+      map: null
     }
+  },
+  destroyed () {
+    window.Vue.$off()
+    window.Vue = null
   },
   mounted () {
     this.$nextTick(() => {
@@ -99,6 +127,50 @@ export default {
       window.Vue.$on('switchLayer', data => {
         // alert(JSON.stringify(data))
         this.switchLayer(data.name)
+      })
+
+      // 响应来自RN的，高亮地图点的动作
+      window.Vue.$on('dispatchGeoJsonDataToH5', data => {
+        // 我这他妈是个天才
+        const targetData = JSON.parse(JSON.parse(JSON.stringify(data.data)))
+
+        if (targetData.isOn) {
+          if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
+            return
+          }
+
+          // 绘制GeoJson数据至某个图层上
+          L.geoJSON(JSON.parse(targetData.targetLocationArea), {
+            // 如果是区域将被渲染如下样式
+            //   style: function (feature) {
+            //     return {color: feature.properties.color}
+            //   }
+            pointToLayer: (feature, latlng) => {
+              const icon = classifyIconMap[targetData.classifyCode]
+                ? classifyIconMap[targetData.classifyCode].icon
+                : 'defaultMarkerIcon'
+              // 下面这个地址要替换为最后部署的地址
+              const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
+              const myIcon = L.icon({
+                iconUrl,
+                iconSize: [40, 40]
+              })
+
+              return L.marker(latlng, { icon: myIcon, title: targetData.targetName })
+            },
+            onEachFeature: (feature, layer) => {
+              this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
+            }
+          }).addTo(this.map)
+        } else {
+          // 清理该图层
+          if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
+            this.map.removeLayer(this.customLayers[targetData.classifyCode + '_' + targetData.id])
+            delete this.customLayers[targetData.classifyCode + '_' + targetData.id]
+          }
+        }
+
+        this.$forceUpdate()
       })
     })
   },
@@ -124,6 +196,8 @@ export default {
     // 地图加载完成
     leafletLoaded () {
       // this.addKmlLayer('/mapdata/邓州市矢量路网/邓州市_矢量路网/邓州市_矢量路网.kml')
+      const map = this.$refs.dengzhouMap.mapObject
+      this.map = map
     },
     // 加载kml数据并添加到图层
     addKmlLayer (url) {
