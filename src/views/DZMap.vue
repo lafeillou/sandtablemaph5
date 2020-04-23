@@ -13,7 +13,7 @@
       @update:center="centerUpdate"
       @update:zoom="zoomUpdate"
     >
-      <l-control-layers :position="layersPosition" :collapsed="true" :sort-layers="false" />
+      <!-- <l-control-layers :position="layersPosition" :collapsed="true" :sort-layers="false" /> -->
       <l-tile-layer
         v-for="tileProvider in tileProviders"
         :key="tileProvider.name"
@@ -33,14 +33,14 @@
 // import { latLng } from 'leaflet'
 import {
   LMap,
-  LTileLayer,
+  LTileLayer
   // LMarker,
   // LPopup,
   // LTooltip,
   // LControlZoom,
   // LControlAttribution,
   // LControlScale,
-  LControlLayers
+  // LControlLayers
 } from 'vue2-leaflet'
 import L from 'leaflet'
 
@@ -50,14 +50,14 @@ export default {
   name: 'DZMap',
   components: {
     LMap,
-    LTileLayer,
+    LTileLayer
     // LMarker,
     // LPopup,
     // LTooltip,
     // LControlZoom,
     // LControlAttribution,
     // LControlScale,
-    LControlLayers
+    // LControlLayers
   },
   data () {
     return {
@@ -68,7 +68,9 @@ export default {
       showParagraph: false,
       mapOptions: {
         // zoomSnap: 0.5
-        zoom: 14
+        zoom: 14,
+        // 不显示放大，缩小按钮，交给RN应用去操作
+        zoomControl: false
       },
       // 图层控制器
       layersPosition: 'topleft',
@@ -93,9 +95,25 @@ export default {
           this.zoom = 10
         }
       })
+
+      window.Vue.$on('switchLayer', data => {
+        // alert(JSON.stringify(data))
+        this.switchLayer(data.name)
+      })
     })
   },
   methods: {
+    // 切换图层
+    switchLayer (layerName) {
+      this.tileProviders = this.tileProviders.map(o => {
+        if (o.name === layerName) {
+          o.visible = true
+        } else {
+          o.visible = false
+        }
+        return o
+      })
+    },
     doTest () {
       const callback = function (data) {
         alert(data.name)
