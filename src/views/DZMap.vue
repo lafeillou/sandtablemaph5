@@ -54,8 +54,22 @@ import L from 'leaflet'
 import { tileProviders } from '@/setting.js'
 
 // icon映射
-import classifyIconMap from './classify-icon-map.js'
+// import classifyIconMap from './classify-icon-map.js'
 
+const iconMap = {
+  SD: require('../assets/icons/SD.png'),
+  GD: require('../assets/icons/GD.png'),
+  GS: require('../assets/icons/GS.png'),
+  SZF: require('../assets/icons/SZF.png'),
+  SK: require('../assets/icons/SK.png'),
+  HL: require('../assets/icons/HL.png'),
+  TL: require('../assets/icons/TL.png'),
+  JSL: require('../assets/icons/JSL.png'),
+  SHL: require('../assets/icons/SHL.png'),
+  QZC: require('../assets/icons/QCZ.png'),
+  HCZ: require('../assets/icons/HCZ.png'),
+  XZ: require('../assets/icons/XZ.png')
+}
 export default {
   name: 'DZMap',
   components: {
@@ -146,11 +160,12 @@ export default {
             //     return {color: feature.properties.color}
             //   }
             pointToLayer: (feature, latlng) => {
-              const icon = classifyIconMap[targetData.classifyCode]
-                ? classifyIconMap[targetData.classifyCode].icon
-                : 'defaultMarkerIcon'
+              // const icon = classifyIconMap[targetData.classifyCode]
+              //   ? targetData.classifyCode
+              //   : 'defaultMarkerIcon'
               // 下面这个地址要替换为最后部署的地址
-              const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
+              // const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
+              const iconUrl = iconMap[targetData.classifyCode]
               const myIcon = L.icon({
                 iconUrl,
                 iconSize: [40, 40]
