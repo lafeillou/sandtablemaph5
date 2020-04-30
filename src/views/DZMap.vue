@@ -171,7 +171,13 @@ export default {
                 iconSize: [40, 40]
               })
               this.map.panTo(latlng)
-              return L.marker(latlng, { icon: myIcon, title: targetData.targetName })
+              const marker = L.marker(latlng, { icon: myIcon, title: targetData.targetName })
+              marker.on('click', e => {
+                // alert(e)
+
+                this.openRightTabsInRN(targetData)
+              })
+              return marker
             },
             onEachFeature: (feature, layer) => {
               this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
@@ -203,10 +209,17 @@ export default {
     },
     doTest () {
       const callback = function (data) {
-        alert(data.name)
-        alert(data.age)
+        // alert(data.name)
+        // alert(data.age)
       }
       window.APP.invokeClientMethod('getUser', { name: 'lafeillou', age: '12' }, callback)
+    },
+
+    openRightTabsInRN (data) {
+      const callback = function (data) {
+        // alert(JSON.stringify(data))
+      }
+      window.APP.invokeClientMethod('openRightTabs', { ...data }, callback)
     },
     // 地图加载完成
     leafletLoaded () {
