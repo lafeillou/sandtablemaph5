@@ -174,12 +174,15 @@ export default {
               const marker = L.marker(latlng, { icon: myIcon, title: targetData.targetName })
               marker.on('click', e => {
                 // alert(e)
-
                 this.openRightTabsInRN(targetData)
               })
               return marker
             },
             onEachFeature: (feature, layer) => {
+              // 将其他layer移除掉
+              Object.keys(this.customLayers).map(o => {
+                this.customLayers[o].remove()
+              })
               this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
             }
           }).addTo(this.map)
