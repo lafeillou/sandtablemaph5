@@ -174,14 +174,15 @@ export default {
             this.map.panTo(latlng)
 
             // const iconUrl = `/img/map-img/${icon}.png`
+            // <p class="marker-name" style="left:${iconW}px;top:${iconW / 2 - 8}px">${
+            //   targetData.targetName
+            // }</p>
             const iconW = 60
             const divIcon = L.divIcon({
               className: 'dIcon',
               html: `<div class="marker-container" style="width:${iconW}px;height:${iconW}px"><span class="circle" style="background:${
               targetData.targetColor
-            }"></span><img src="${iconUrl}"/><p class="marker-name" style="left:${iconW}px;top:${iconW / 2 - 8}px">${
-              targetData.targetName
-            }</p></div>`,
+            }"></span><img src="${iconUrl}"/></div>`,
               iconSize: [iconW, iconW]
             })
 
