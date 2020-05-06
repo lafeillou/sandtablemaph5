@@ -148,51 +148,53 @@ export default {
         // 我这他妈是个天才
         const targetData = JSON.parse(JSON.parse(JSON.stringify(data.data)))
 
-        if (targetData.isOn) {
-          if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
-            return
-          }
+        // alert(data.data)
+        // if (targetData.isOn) {
+        // if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
+        //   return
+        // }
 
-          // 绘制GeoJson数据至某个图层上
-          L.geoJSON(JSON.parse(targetData.targetLocationArea), {
-            // 如果是区域将被渲染如下样式
-            //   style: function (feature) {
-            //     return {color: feature.properties.color}
-            //   }
-            pointToLayer: (feature, latlng) => {
-              // const icon = classifyIconMap[targetData.classifyCode]
-              //   ? targetData.classifyCode
-              //   : 'defaultMarkerIcon'
-              // 下面这个地址要替换为最后部署的地址
-              // const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
-              const iconUrl = iconMap[targetData.classifyCode]
-              const myIcon = L.icon({
-                iconUrl,
-                iconSize: [40, 40]
-              })
-              this.map.panTo(latlng)
-              const marker = L.marker(latlng, { icon: myIcon, title: targetData.targetName })
-              marker.on('click', e => {
-                // alert(e)
-                this.openRightTabsInRN(targetData)
-              })
-              return marker
-            },
-            onEachFeature: (feature, layer) => {
-              // 将其他layer移除掉
-              Object.keys(this.customLayers).map(o => {
-                this.customLayers[o].remove()
-              })
-              this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
-            }
-          }).addTo(this.map)
-        } else {
-          // 清理该图层
-          if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
-            this.map.removeLayer(this.customLayers[targetData.classifyCode + '_' + targetData.id])
-            delete this.customLayers[targetData.classifyCode + '_' + targetData.id]
+        // 绘制GeoJson数据至某个图层上
+        L.geoJSON(JSON.parse(targetData.targetLocationArea), {
+          // 如果是区域将被渲染如下样式
+          //   style: function (feature) {
+          //     return {color: feature.properties.color}
+          //   }
+          pointToLayer: (feature, latlng) => {
+            // const icon = classifyIconMap[targetData.classifyCode]
+            //   ? targetData.classifyCode
+            //   : 'defaultMarkerIcon'
+            // 下面这个地址要替换为最后部署的地址
+            // const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
+            const iconUrl = iconMap[targetData.classifyCode]
+            const myIcon = L.icon({
+              iconUrl,
+              iconSize: [40, 40]
+            })
+            this.map.panTo(latlng)
+            const marker = L.marker(latlng, { icon: myIcon, title: targetData.targetName })
+            marker.on('click', e => {
+              // alert(e)
+              this.openRightTabsInRN(targetData)
+            })
+            return marker
+          },
+          onEachFeature: (feature, layer) => {
+            // 将其他layer移除掉
+            Object.keys(this.customLayers).map(o => {
+              this.customLayers[o].remove()
+              delete this.customLayers[o]
+            })
+            this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
           }
-        }
+        }).addTo(this.map)
+        // } else {
+        //   // 清理该图层
+        //   if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
+        //     this.map.removeLayer(this.customLayers[targetData.classifyCode + '_' + targetData.id])
+        //     delete this.customLayers[targetData.classifyCode + '_' + targetData.id]
+        //   }
+        // }
 
         this.$forceUpdate()
       })
