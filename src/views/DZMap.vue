@@ -167,12 +167,25 @@ export default {
             // 下面这个地址要替换为最后部署的地址
             // const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
             const iconUrl = iconMap[targetData.classifyCode]
-            const myIcon = L.icon({
-              iconUrl,
-              iconSize: [40, 40]
-            })
+            // const myIcon = L.icon({
+            //   iconUrl,
+            //   iconSize: [40, 40]
+            // })
             this.map.panTo(latlng)
-            const marker = L.marker(latlng, { icon: myIcon, title: targetData.targetName })
+
+            // const iconUrl = `/img/map-img/${icon}.png`
+            const iconW = 60
+            const divIcon = L.divIcon({
+              className: 'dIcon',
+              html: `<div class="marker-container" style="width:${iconW}px;height:${iconW}px"><span class="circle" style="background:${
+              targetData.targetColor
+            }"></span><img src="${iconUrl}"/><p class="marker-name" style="left:${iconW}px;top:${iconW / 2 - 8}px">${
+              targetData.targetName
+            }</p></div>`,
+              iconSize: [iconW, iconW]
+            })
+
+            const marker = L.marker(latlng, { icon: divIcon, title: targetData.targetName })
             marker.on('click', e => {
               // alert(e)
               this.openRightTabsInRN(targetData)
@@ -268,5 +281,50 @@ export default {
 .global-map-container {
   width: 100%;
   height: 100%;
+}
+
+/*0%开始，100%结束*/
+@keyframes scale {
+  0% {
+    transform: scale(1);
+  }
+  50%,
+  75% {
+    transform: scale(2);
+  }
+  78%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.marker-container {
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .circle {
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    opacity: 0.8;
+    background-color: #ffff00;
+    animation: scale 2s infinite cubic-bezier(0, 0, 0.49, 1.02);
+    animation-delay: 150ms;
+  }
+
+  .marker-name {
+    position: absolute;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+  }
 }
 </style>
