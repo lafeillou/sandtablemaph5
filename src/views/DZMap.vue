@@ -113,7 +113,9 @@ export default {
       // 自定义图层集合(GeoJson格式)，点击某个目标，发送一个GeoJson,就会对应到这个map里面
       customLayers: {},
       // leaflet地图实例引用
-      map: null
+      map: null,
+      // true为共显模式, false为排他模式
+      showMode: true
     }
   },
   destroyed () {
@@ -142,7 +144,54 @@ export default {
         // alert(JSON.stringify(data))
         this.switchLayer(data.name)
       })
+      // 响应来自RN的,高亮地图上所有目标，作为背景显示
+      window.Vue.$on('dispatchAllGeoJsonDataAsBgToH5', data => {
+        const targetData = JSON.parse(JSON.parse(JSON.stringify(data.data)))
+        this.showMode = targetData.showMode
+        // alert(JSON.stringify(targetData))
+        // 显示背景，清除背景
+        if (targetData.showMode) {
+          targetData.targetList.forEach((o, index) => {
+            // alert(JSON.stringify(o))
 
+            o.targets.forEach((subO, subIndex) => {
+              // 绘制GeoJson数据至某个图层上
+              L.geoJSON(JSON.parse(subO.targetLocationArea), {
+              // 如果是区域将被渲染如下样式
+              //   style: function (feature) {
+              //     return {color: feature.properties.color}
+              //   }
+                pointToLayer: (feature, latlng) => {
+                  const iconUrl = iconMap[subO.classifyCode]
+                  const iconW = 60
+                  const divIcon = L.divIcon({
+                    className: 'dIcon',
+                    html: `<div class="marker-container" style="width:${iconW}px;height:${iconW}px"><span class="circle-no-animation"></span><img src="${iconUrl}"/></div>`,
+                    iconSize: [iconW, iconW]
+                  })
+
+                  const marker = L.marker(latlng, { icon: divIcon, title: subO.targetName })
+                  marker.on('click', e => {
+                    this.openRightTabsInRN(subO)
+                  })
+                  return marker
+                },
+                onEachFeature: (feature, layer) => {
+                  this.customLayers[subO.classifyCode + '_' + subO.id] = layer
+                }
+              }).addTo(this.map)
+            })
+          })
+        } else {
+          alert(this.showMode)
+          // 将其他layer移除掉
+          Object.keys(this.customLayers).map(o => {
+            this.customLayers[o].remove()
+            delete this.customLayers[o]
+          })
+        }
+        this.$forceUpdate()
+      })
       // 响应来自RN的，高亮地图点的动作
       window.Vue.$on('dispatchGeoJsonDataToH5', data => {
         // 我这他妈是个天才
@@ -188,17 +237,18 @@ export default {
 
             const marker = L.marker(latlng, { icon: divIcon, title: targetData.targetName })
             marker.on('click', e => {
-              // alert(e)
               this.openRightTabsInRN(targetData)
             })
             return marker
           },
           onEachFeature: (feature, layer) => {
-            // 将其他layer移除掉
-            Object.keys(this.customLayers).map(o => {
-              this.customLayers[o].remove()
-              delete this.customLayers[o]
-            })
+            if (!this.showMode) {
+              // 将其他layer移除掉
+              Object.keys(this.customLayers).map(o => {
+                this.customLayers[o].remove()
+                delete this.customLayers[o]
+              })
+            }
             this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
           }
         }).addTo(this.map)
@@ -269,10 +319,20 @@ export default {
       //   })
     },
     zoomUpdate (zoom) {
-      this.currentZoom = zoom
+      this.zoom = zoom
+      const callback = function (data) {
+        // alert(data.zoom)
+        // alert(data.center)
+      }
+      window.APP.invokeClientMethod('getCenterAndZoom', { zoom: this.zoom, center: this.center }, callback)
     },
     centerUpdate (center) {
-      this.currentCenter = center
+      this.center = center
+      const callback = function (data) {
+        // alert(data.zoom)
+        // alert(data.center)
+      }
+      window.APP.invokeClientMethod('getCenterAndZoom', { zoom: this.zoom, center: this.center }, callback)
     }
   }
 }
@@ -319,6 +379,18 @@ export default {
     background-color: #ffff00;
     animation: scale 2s infinite cubic-bezier(0, 0, 0.49, 1.02);
     animation-delay: 150ms;
+  }
+
+  .circle-no-animation{
+    position: absolute;
+    display: inline-block;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    // opacity: 0.8;
+    // background-color: #ffff00;
   }
 
   .marker-name {
