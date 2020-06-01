@@ -112,6 +112,7 @@ export default {
       tileProviders: tileProviders,
       // 自定义图层集合(GeoJson格式)，点击某个目标，发送一个GeoJson,就会对应到这个map里面
       customLayers: {},
+      customBgLayers: {},
       // leaflet地图实例引用
       map: null,
       // true为共显模式, false为排他模式
@@ -170,24 +171,35 @@ export default {
                     iconSize: [iconW, iconW]
                   })
 
-                  const marker = L.marker(latlng, { icon: divIcon, title: subO.targetName })
+                  const marker = L.marker(latlng, { icon: divIcon, title: subO.targetName, zIndexOffset: 1000 })
                   marker.on('click', e => {
                     this.openRightTabsInRN(subO)
                   })
                   return marker
                 },
                 onEachFeature: (feature, layer) => {
-                  this.customLayers[subO.classifyCode + '_' + subO.id] = layer
+                  this.customBgLayers[subO.classifyCode + '_' + subO.id] = layer
                 }
               }).addTo(this.map)
             })
           })
         } else {
-          alert(this.showMode)
+          // alert(this.showMode)
+          // alert(JSON.stringify(this.customLayers))
           // 将其他layer移除掉
-          Object.keys(this.customLayers).map(o => {
-            this.customLayers[o].remove()
-            delete this.customLayers[o]
+          // this.map.eachLayer((layer) => {
+          //   alert(JSON.stringify(layer))
+          // })
+
+          // this.map.eachLayer(function (layer) {
+          //   if (layer.name !== '地图' || layer.name !== '卫星+路网' || layer.name !== '卫星') {
+          //     this.map.removeLayer(layer)
+          //   }
+          // })
+          Object.keys(this.customBgLayers).map(obj => {
+            // alert(JSON.stringify(obj))
+            this.customBgLayers[obj].remove()
+            delete this.customBgLayers[obj]
           })
         }
         this.$forceUpdate()
@@ -235,20 +247,20 @@ export default {
               iconSize: [iconW, iconW]
             })
 
-            const marker = L.marker(latlng, { icon: divIcon, title: targetData.targetName })
+            const marker = L.marker(latlng, { icon: divIcon, title: targetData.targetName, zIndexOffset: 1000 })
             marker.on('click', e => {
               this.openRightTabsInRN(targetData)
             })
             return marker
           },
           onEachFeature: (feature, layer) => {
-            if (!this.showMode) {
-              // 将其他layer移除掉
-              Object.keys(this.customLayers).map(o => {
-                this.customLayers[o].remove()
-                delete this.customLayers[o]
-              })
-            }
+            // if (!this.showMode) {
+            // 将其他layer移除掉
+            Object.keys(this.customLayers).map(o => {
+              this.customLayers[o].remove()
+              delete this.customLayers[o]
+            })
+            // }
             this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
           }
         }).addTo(this.map)
