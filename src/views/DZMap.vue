@@ -66,7 +66,7 @@ const iconMap = {
   TL: require('../assets/icons/TL.png'),
   JSL: require('../assets/icons/JSL.png'),
   SHL: require('../assets/icons/SHL.png'),
-  QZC: require('../assets/icons/QCZ.png'),
+  QCZ: require('../assets/icons/QCZ.png'),
   HCZ: require('../assets/icons/HCZ.png'),
   XZ: require('../assets/icons/XZ.png')
 }
