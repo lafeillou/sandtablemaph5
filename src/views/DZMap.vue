@@ -24,6 +24,14 @@
         layer-type="base"
       />
 
+         <l-circle
+         :key="circle.radius"
+      :lat-lng="circle.center"
+      :radius="circle.radius"
+      :color="circle.color"
+      :fillColor="circle.fillColor"
+    />
+
       <!--自定义图层-->
       <!-- <l-geo-json :geojson="JSON.parse(item.targetLocationArea)" v-for="item in customLayers" :key="item.id" :visible="item.isOn"></l-geo-json> -->
     </l-map>
@@ -40,7 +48,8 @@
 // import { latLng } from 'leaflet'
 import {
   LMap,
-  LTileLayer
+  LTileLayer,
+  LCircle
   // LMarker,
   // LPopup,
   // LTooltip,
@@ -74,7 +83,8 @@ export default {
   name: 'DZMap',
   components: {
     LMap,
-    LTileLayer
+    LTileLayer,
+    LCircle
     // LMarker,
     // LPopup,
     // LTooltip,
@@ -116,7 +126,14 @@ export default {
       // leaflet地图实例引用
       map: null,
       // true为共显模式, false为排他模式
-      showMode: true
+      showMode: true,
+      // 兵力范围
+      circle: {
+        color: '#0e1c3d',
+        center: [32.691164, 112.0875],
+        radius: 0,
+        fillColor: '#162a48'
+      }
     }
   },
   destroyed () {
@@ -125,8 +142,9 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
+      // 测试，绘制一个圆
+
       window.Vue.$on('zoomIn', () => {
-        // alert('zoomIn')
         this.zoom = this.zoom + 1
         if (this.zoom > 18) {
           this.zoom = 18
@@ -134,7 +152,6 @@ export default {
       })
 
       window.Vue.$on('zoomOut', () => {
-        // alert('zoomIn')
         this.zoom = this.zoom - 1
         if (this.zoom < 10) {
           this.zoom = 10
@@ -142,19 +159,25 @@ export default {
       })
 
       window.Vue.$on('switchLayer', data => {
-        // alert(JSON.stringify(data))
         this.switchLayer(data.name)
+      })
+
+      window.Vue.$on('drawCircle', data => {
+        // alert(data.data)
+        const args = JSON.parse(data.data)
+        const circle = { ...this.circle }
+        circle.center = [args.targetLocation[1], args.targetLocation[0]]
+        circle.radius = args.radius * 1000
+        this.circle = circle
+        // this.$forceUpdate()
       })
       // 响应来自RN的,高亮地图上所有目标，作为背景显示
       window.Vue.$on('dispatchAllGeoJsonDataAsBgToH5', data => {
         const targetData = JSON.parse(JSON.parse(JSON.stringify(data.data)))
         this.showMode = targetData.showMode
-        // alert(JSON.stringify(targetData))
         // 显示背景，清除背景
         if (targetData.showMode) {
           targetData.targetList.forEach((o, index) => {
-            // alert(JSON.stringify(o))
-
             o.targets.forEach((subO, subIndex) => {
               // 绘制GeoJson数据至某个图层上
               L.geoJSON(JSON.parse(subO.targetLocationArea), {
@@ -206,15 +229,7 @@ export default {
       })
       // 响应来自RN的，高亮地图点的动作
       window.Vue.$on('dispatchGeoJsonDataToH5', data => {
-        // 我这他妈是个天才
         const targetData = JSON.parse(JSON.parse(JSON.stringify(data.data)))
-
-        // alert(data.data)
-        // if (targetData.isOn) {
-        // if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
-        //   return
-        // }
-
         // 绘制GeoJson数据至某个图层上
         L.geoJSON(JSON.parse(targetData.targetLocationArea), {
           // 如果是区域将被渲染如下样式
@@ -222,22 +237,8 @@ export default {
           //     return {color: feature.properties.color}
           //   }
           pointToLayer: (feature, latlng) => {
-            // const icon = classifyIconMap[targetData.classifyCode]
-            //   ? targetData.classifyCode
-            //   : 'defaultMarkerIcon'
-            // 下面这个地址要替换为最后部署的地址
-            // const iconUrl = `http://192.168.8.154/img/map-img/${icon}.png`
             const iconUrl = iconMap[targetData.classifyCode]
-            // const myIcon = L.icon({
-            //   iconUrl,
-            //   iconSize: [40, 40]
-            // })
             this.map.panTo(latlng)
-
-            // const iconUrl = `/img/map-img/${icon}.png`
-            // <p class="marker-name" style="left:${iconW}px;top:${iconW / 2 - 8}px">${
-            //   targetData.targetName
-            // }</p>
             const iconW = 60
             const divIcon = L.divIcon({
               className: 'dIcon',
@@ -264,14 +265,6 @@ export default {
             this.customLayers[targetData.classifyCode + '_' + targetData.id] = layer
           }
         }).addTo(this.map)
-        // } else {
-        //   // 清理该图层
-        //   if (this.customLayers[targetData.classifyCode + '_' + targetData.id]) {
-        //     this.map.removeLayer(this.customLayers[targetData.classifyCode + '_' + targetData.id])
-        //     delete this.customLayers[targetData.classifyCode + '_' + targetData.id]
-        //   }
-        // }
-
         this.$forceUpdate()
       })
     })
