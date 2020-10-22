@@ -1,13 +1,13 @@
 // 内网： http://192.168.8.154
 // 外网： http://111.47.10.117:30024
 export const baseURL =
-  process.env.NODE_ENV === 'development' ? 'http://192.168.8.154' : `${window.location.origin}`
+  process.env.NODE_ENV === 'development' ? 'http://192.168.8.133' : `${window.location.origin}`
 
 // 沙盘所属区域类型（省、市、区/县），合法范围[PROVINCE|CITY|DISTRICT]
 export const areaType = 'DISTRICT'
 
 // 沙盘所属区域名称
-export const areaName = '邓州市'
+export const areaName = '鹤壁市'
 
 // 地图瓦片资源路径
 export const tileProviders = [

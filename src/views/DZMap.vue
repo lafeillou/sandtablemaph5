@@ -106,7 +106,7 @@ export default {
   data () {
     return {
       zoom: 14,
-      center: L.latLng(32.68948908, 112.08110332),
+      center: L.latLng(35.74798822, 114.29144204),
       currentZoom: 14,
       currentCenter: null,
       showParagraph: false,
@@ -347,6 +347,9 @@ export default {
 .global-map-container {
   width: 100%;
   height: 100%;
+  .leaflet-container{
+    background-color:rgb(53, 84, 157);
+  }
 }
 
 /*0%开始，100%结束*/
