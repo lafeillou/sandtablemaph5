@@ -77,7 +77,8 @@ const iconMap = {
   SHL: require('../assets/icons/SHL.png'),
   QCZ: require('../assets/icons/QCZ.png'),
   HCZ: require('../assets/icons/HCZ.png'),
-  XZ: require('../assets/icons/XZ.png')
+  XZ: require('../assets/icons/XZ.png'),
+  QX: require('../assets/icons/SZF.png')
 }
 export default {
   name: 'DZMap',

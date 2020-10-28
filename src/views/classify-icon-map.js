@@ -1,4 +1,8 @@
 const classifyIconMap = {
+  QX: {
+    name: '区县',
+    icon: 'iconshiweizhengfu'
+  },
   SZF: {
     name: '市政府',
     icon: 'iconshiweizhengfu'
