@@ -46,6 +46,8 @@
 
 <script>
 // import { latLng } from 'leaflet'
+import { wgsGcjEncrypts } from './transform'
+
 import {
   LMap,
   LTileLayer,
@@ -105,9 +107,11 @@ export default {
     // }
   },
   data () {
+    const currentPoint = wgsGcjEncrypts(33.62022400, 114.65507984)
+    console.log(currentPoint)
     return {
       zoom: 14,
-      center: L.latLng(35.74798822, 114.29144204),
+      center: L.latLng(currentPoint.lat, currentPoint.lon),
       currentZoom: 14,
       currentCenter: null,
       showParagraph: false,
@@ -131,7 +135,7 @@ export default {
       // 兵力范围
       circle: {
         color: '#0e1c3d',
-        center: [32.691164, 112.0875],
+        center: [currentPoint.lat, currentPoint.lon],
         radius: 0,
         fillColor: '#162a48'
       }
